@@ -15,14 +15,27 @@
        (drop (char-index char))
        (take (count alphabet))))
 
-(defn rotate [row col]
-  (let [row-index (char-index row)
-        col-index (char-index col)]
-    (nth (cycle alphabet) (+ col-index row-index))))
+(defn rotate [k m]
+  "Given a key char k and a message char m, gives the nth k char in the m-starting alphabet."
+  (nth (alphabet-from m) (.indexOf alphabet k)))
 
-(defn counter-rotate [k m]
-  (let [m-index (.indexOf (alphabet-from k) m)]
-    (nth alphabet m-index)))
+(defn counter-rotate [x y]
+  "Given x y chars, gives the nth (index of y in x-starting alphabet) char in the alphabet."
+    (nth alphabet (.indexOf (alphabet-from x) y)))
+
+(defn find-smallest-cypher [cypher-str]
+  "Given a cypher string, returns the smallest cypher string"
+  (let [cypher (seq cypher-str)]
+    (loop [pattern []
+           rest cypher]
+      (let [pattern-string (take (count cypher) (cycle pattern))
+            pattern-identified? (= pattern-string cypher)
+            [char & r] rest
+            new-pattern (conj pattern char)]
+        (cond
+          pattern-identified? (apply str pattern)
+          (empty? rest) cypher-str
+          :else (recur new-pattern r))))))
 
 (defn encode [keyword message]
   (let [keywords (cycle keyword)
@@ -35,5 +48,6 @@
     (apply str chars)))
 
 (defn decipher [cipher message]
-  "decypherme")
-
+  (let [chars (map counter-rotate message cipher)]
+    (-> (apply str chars)
+        find-smallest-cypher)))
